@@ -1,0 +1,131 @@
+# SelectScreenSession - A Screen Session Manager
+# Copyright (C) 2010-2011, Gabriel Li
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# In addition, as a special exception, the copyright holders give
+# permission to link the code of portions of this program with the
+# OpenSSL library under certain conditions as described in each
+# individual source file, and distribute linked combinations
+# including the two.
+#
+# You must obey the GNU General Public License in all respects for
+# all of the code used other than OpenSSL.  If you modify file(s)
+# with this exception, you may extend this exception to your version
+# of the file(s), but you are not obligated to do so.  If you do not
+# wish to do so, delete this exception statement from your version.
+# If you delete this exception statement from all source files in the
+# program, then also delete it here.
+#
+# Contact:  Gabriel Li <gabrielyaguang@gmail.com>
+#           Beijing, China
+
+
+
+#!/bin/bash
+
+while true
+do
+	clear
+
+	SCREEN_SESSION_LIST=`
+screen -ls | egrep "\t" | sed '$d' | while read line
+do 
+	SCREEN_SESSION=\`echo $line | sed 's/ /./g'\`
+	echo -n "$SCREEN_SESSION "
+done`
+
+	if [ "$SCREEN_SESSION_LIST" == "" ] || [ "$ACT" == "C" ]
+	then
+		if [ -z "$SCREEN_SESSION_LIST" ]
+		then
+			echo "No screen session remained, input a session name to create one:"
+		else
+			ACT=""
+			echo "Input session name:"
+		fi
+
+		read SESSION_NAME
+
+		if [ -z "$SESSION_NAME" ]
+		then
+			continue
+		fi
+
+		screen -dR $SESSION_NAME
+		SESSION_NAME=""
+		continue
+	fi
+
+	
+	SCREEN_SESSION_LIST="Create 
+$SCREEN_SESSION_LIST"
+
+	while true
+	do
+		echo "Which screen session to attach? Input the leftmost number:"
+
+		select SCREEN_SESSION in $SCREEN_SESSION_LIST
+		do
+			break
+		done
+
+		if [ "$SCREEN_SESSION" == "Create" ]
+		then
+			ACT="C"
+			break
+		fi
+
+		if [ -z "$SCREEN_SESSION" ]
+		then
+			continue
+		fi
+
+		SESSION_DETAIL=`echo $SCREEN_SESSION | grep Attached`
+		if [ -z "$SESSION_DETAIL" ]
+		then
+			break
+		else
+			while true
+			do
+				echo "Want to reattach $SCREEN_SESSION? It is an ATTACHED session. Input 1 or 2:"
+
+				select ANSWER in "NO" "YES"
+				do
+					break
+				done
+
+				if [ -n "$ANSWER" ]
+				then
+					break
+				fi
+			done
+		fi
+
+		if [ "$ANSWER" = "YES" ]
+		then
+			break
+		fi
+	done
+
+	if [ -z "$ACT" ]
+	then
+		SCREEN_SID=`echo $SCREEN_SESSION | awk -F"." '{print $1}'`
+
+		screen -dR $SCREEN_SID
+	fi
+
+	clear
+done
