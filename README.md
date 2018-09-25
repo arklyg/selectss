@@ -3,7 +3,7 @@
 selectss is a linux tool written by bash, which can help managing screen session, so to expedite screen session creation or selecting after every login.  
 
 ### Install
-+ First, you should got screen installed already.  
++ First, you should get screen installed already.  
 + Second, run this command in your terminal.
 
 ```php
