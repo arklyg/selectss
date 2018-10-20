@@ -7,6 +7,7 @@ selectss is a linux tool written by bash, which can help managing screen session
 + Second, run this command in your terminal.
 
 ```php
+chmod a+rx selectss
 sudo cp selectss /usr/local/bin/
 echo "selectss" >> ~/.bash_profile
 ```
